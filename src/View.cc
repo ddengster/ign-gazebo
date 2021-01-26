@@ -17,6 +17,9 @@
 #include "ignition/gazebo/detail/View.hh"
 #include "ignition/gazebo/EntityComponentManager.hh"
 
+#define BOOST_STACKTRACE_USE_ADDR2LINE
+#include <boost/stacktrace.hpp>
+
 using namespace ignition;
 using namespace gazebo;
 using namespace detail;
@@ -48,6 +51,7 @@ void View::AddComponent(const Entity _entity,
   {
     printf("View::AddComponent entity: %lu\n", _entity);
     std::cout << "thread: " << std::this_thread::get_id() << std::endl;
+    std::cout << boost::stacktrace::stacktrace() << std::endl;
   }
   this->components.insert(
       std::make_pair(std::make_pair(_entity, _typeId), _componentId));
