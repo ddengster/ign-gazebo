@@ -843,6 +843,7 @@ void RenderUtilPrivate::CreateRenderingEntities(
             const components::Pose *_pose,
             const components::ParentEntity *_parent)->bool
         {
+          printf("loading model: %s for entity: %lu\n", _name->Data().c_str(), _entity);
           sdf::Model model;
           model.SetName(_name->Data());
           model.SetRawPose(_pose->Data());
@@ -860,6 +861,7 @@ void RenderUtilPrivate::CreateRenderingEntities(
             const components::Pose *_pose,
             const components::ParentEntity *_parent)->bool
         {
+          printf("loading link: %s for entity: %lu, parent entity: %lu\n", _name->Data().c_str(), _entity, _parent->Data());
           sdf::Link link;
           link.SetName(_name->Data());
           link.SetRawPose(_pose->Data());

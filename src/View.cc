@@ -21,9 +21,16 @@ using namespace ignition;
 using namespace gazebo;
 using namespace detail;
 
+static Entity to_lookat = kNullEntity;
 //////////////////////////////////////////////////
 void View::AddEntity(const Entity _entity, const bool _new)
 {
+  // std::cout << "AddEntity current thread: " << std::this_thread::get_id() << std::endl;
+  if (to_lookat == _entity)
+  {
+    printf("View::AddEntity entity added: %lu\n", _entity);
+    std::cout << "thread: " << std::this_thread::get_id() << std::endl;
+  }
   this->entities.insert(_entity);
   if (_new)
   {
@@ -36,6 +43,12 @@ void View::AddComponent(const Entity _entity,
     const ComponentTypeId _typeId,
     const ComponentId _componentId)
 {
+  // std::cout << "AddComponent current thread: " << std::this_thread::get_id() << std::endl;
+  if (to_lookat == _entity)
+  {
+    printf("View::AddComponent entity: %lu\n", _entity);
+    std::cout << "thread: " << std::this_thread::get_id() << std::endl;
+  }
   this->components.insert(
       std::make_pair(std::make_pair(_entity, _typeId), _componentId));
 }
@@ -45,7 +58,7 @@ bool View::RemoveEntity(const Entity _entity, const ComponentTypeKey &_key)
 {
   if (this->entities.find(_entity) == this->entities.end())
     return false;
-
+  printf("ent removed: %lu\n", _entity);
   // Otherwise, remove the entity from the view
   this->entities.erase(_entity);
   this->newEntities.erase(_entity);
@@ -64,6 +77,30 @@ const components::BaseComponent *View::ComponentImplementation(
     ComponentTypeId _typeId,
     const EntityComponentManager *_ecm) const
 {
+#if 0
+  try
+  {
+    this->components.at({_entity, _typeId});
+  }
+  catch (...)
+  {
+    printf("qweqw\n");
+    printf("entity: %llu typeid %lu\n", _entity, _typeId);
+    std::cout << "current thread: " << std::this_thread::get_id() << std::endl;
+    /*for (auto it : components)
+    {
+      printf("ent: %lu cmpid: %lu\n", it.first.first, it.first.second);
+    }*/
+  }
+#else
+  if (this->components.find({_entity, _typeId}) == this->components.end())
+  {
+    printf("sleeping in View::ComponentImplementation(), entity: %lu\n", _entity);
+    std::cout << "thread: " << std::this_thread::get_id() << std::endl;
+    to_lookat = _entity;
+    sleep(1);
+  }
+#endif
   return _ecm->ComponentImplementation(
       {_typeId, this->components.at({_entity, _typeId})});
 }
